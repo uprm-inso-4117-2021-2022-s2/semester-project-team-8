@@ -1,6 +1,8 @@
 from flask import Flask, request
-from handler.UsersHandler import UsersHandler
+from handlers.UsersHandler import UsersHandler
+from handlers.FieldsHandler import FieldsHandler
 from flask_cors import CORS
+from flask import jsonify
 
 # Activate
 app = Flask(__name__)
@@ -10,7 +12,7 @@ CORS(app)
 
 @app.route('/')
 def greeting():
-    return 'Hello, this is the Matchware App!'
+    return 'Welcome to CSGuide!!!'
 
 
 @app.route('/user', methods=['GET', 'POST'])
@@ -23,83 +25,32 @@ def users():
             return UsersHandler().getAllUsers()
 
 
-@app.route('/messages', methods=['GET', 'POST'])
-def messages():
-    if request.method == 'POST':
-        return MessagesHandler().insertMessageJson(request.json)
-    else:
-        if not request.args:
-            print("Here")
-            return MessagesHandler().getAllMessagess()
+@app.route('/user/<int:id>', methods=['GET'])
+def getusersbyid(id):
+    if request.method == 'GET':
+        print("REQUEST: ", request.json)
+        response = UsersHandler().getUserById()
+        if not response:
+            return jsonify(Error="User not found."), 404
+        else:
+            return True
 
 
-@app.route('/project', methods=['GET', 'POST'])
-def project():
+@app.route('/field', methods=['GET', 'POST'])
+def fields():
     if request.method == 'POST':
         print("REQUEST: ", request.json)
-        return ProjectHandler().insertProjectJson(request.json)
+        return FieldsHandler().insertFieldJson(request.json)
     else:
         if not request.args:
-            return ProjectHandler().getAllProjects()
+            return FieldsHandler().getAllFields()
 
 
-@app.route('/post', methods=['GET', 'POST'])
-def post():
-    if request.method == 'POST':
+@app.route('/field/<int:id>', methods=['GET'])
+def getfieldsbyid(id):
+    if request.method == 'GET':
         print("REQUEST: ", request.json)
-        return PostHandler().insertPostJson(request.json)
-    else:
-        if not request.args:
-            return PostHandler().getAllPosts()
-
-
-@app.route('/members', methods=['GET', 'POST'])
-def members():
-    if request.method == 'POST':
-        print("REQUEST: ", request.json)
-        return MemberHandler().insertMemberJson(request.json)
-    else:
-        if not request.args:
-            return MemberHandler().getAllMembers()
-
-
-@app.route('/credentials', methods=['GET', 'POST'])
-def credentials():
-    if request.method == 'POST':
-        print("REQUEST: ", request.json)
-        return CredentialHandler().insertCredentialTestJson(request.json)
-    else:
-        if not request.args:
-            return CredentialHandler().getAllCredentials()
-
-
-@app.route('/credentials/logincheck/<string:username>/<string:password>', methods=['POST'])
-def getCredentialbyUsernameandPassword(username, password):
-    if request.method == 'POST':
-        return CredentialHandler().getCredentialByUsernameandPassword(username, password)
-    else:
-        if not request.args:
-            return CredentialHandler().getAllCredentials()
-
-
-@app.route('/comments', methods=['GET', 'POST'])
-def comments():
-    if request.method == 'POST':
-        print("REQUEST: ", request.json)
-        return CommentsHandler().insertCommentJson(request.json)
-    else:
-        if not request.args:
-            return CommentsHandler().getAllComments()
-
-
-@app.route('/images', methods=['GET', 'POST'])
-def images():
-    if request.method == 'POST':
-        print("REQUEST: ", request.json)
-        return ImagesHandler().insertImageJson(request.json)
-    else:
-        if not request.args:
-            return ImagesHandler().getAllImages()
+        return FieldsHandler().getFieldById()
 
 
 if __name__ == '__main__':

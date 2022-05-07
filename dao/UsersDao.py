@@ -1,18 +1,11 @@
-import MySQLdb
-from config import dbconfig
+import pymssql
+import deal
 
 
 class UserDAO:
-    # fix this url crap tonight
-   ## def __init__(self):
-   ##     connection_url = MySQLdb.connect(host='24.54.205.36', user='RemoteMatcha', passwd='RemoteMatcha', db='BeyondHorizonsDB',port = 6606)
-   ##     # connection_url = (host="localhost", user='Argent', passwd='ArgentSable776', db='MatchaWareDB')
-   ##     self.conn = connection_url
-
     def __init__(self):
-        connection_url = MySQLdb.connect(host='24.54.205.36', user='RemoteMatcha', passwd='RemoteMatcha',
-                                         db='BeyondHorizonsDB', port=6606)
-        ##connection_url = MySQLdb.connect(host="localhost", user='root', passwd='root', db='BeyondHorizonsDB')
+        connection_url = pymssql.connect(
+            't8csguide.cftycj6fuueb.us-east-1.rds.amazonaws.com', 'csgadmin', 'csg123456', 'csguide')
         self.conn = connection_url
 
     def getAllUsers(self):
@@ -24,33 +17,35 @@ class UserDAO:
             result.append(row)
         return result
 
-    def getUserById(self, UserID):
+    @deal.pre(lambda _: _.result > 0)
+    def getUserById(self, UAID):
         cursor = self.conn.cursor()
-        query = "select * from Users Where userid = %s;"
-        cursor.execute(query, (UserID,))
+        query = "select * from Users Where UAID = %s;"
+        cursor.execute(query, (UAID,))
         result = cursor.fetchone()
         return result
 
-    def insert(self, accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate, lastlogin, status):
+    def insert(self, firstname, lastname, email, password, status):
         cursor = self.conn.cursor()
-        query = "insert into Users(accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate, lastlogin, status) values (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) ;"
-        cursor.execute(query, (accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate, lastlogin, status))
+        query = "insert into Users(firstname, lastname, email, password, status) values (%s, %s, %s, %s, %s) ;"
+        cursor.execute(query, (firstname, lastname, email, password, status))
         query = "SELECT LAST_INSERT_ID();"
         cursor.execute(query)
-        userid = cursor.fetchall()[0]
+        UAID = cursor.fetchall()[0]
         self.conn.commit()
-        return userid
+        return UAID
 
-    def delete(self, UserID):
+    def delete(self, UAID):
         cursor = self.conn.cursor()
-        query = "delete from Users where userid = %s;"
-        cursor.execute(query, (UserID,))
+        query = "delete from Users where UAID = %s;"
+        cursor.execute(query, (UAID,))
         self.conn.commit()
-        return UserID
+        return UAID
 
-    def update(self, UserID, accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate, lastlogin, status):
+    def update(self, UAID, firstname, lastname, email, password, status):
         cursor = self.conn.cursor()
-        query = "update Users set accounttypenumber = %s, firstname = %s, lastname = %s, phone = %s, email = %s, majornumber = %s, aboutme = %s, yearofenrollment = %s, creationdate = %s, lastlogin = %s, status = %s where userid = %s;"
-        cursor.execute(query, (accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate, lastlogin, status, UserID,))
+        query = "update Users set firstname = %s, lastname = %s, email = %s, password = %s, status = %s where UAID = %s;"
+        cursor.execute(query, (firstname, lastname,
+                       email, password, status, UAID,))
         self.conn.commit()
-        return UserID
+        return UAID

@@ -1,42 +1,30 @@
 from flask import jsonify
-from dao import UserDao
+from dao import UsersDao
 
 
 class UsersHandler:
     def build_users_dict(self, row):
         result = {}
-        result['UserID'] = row[0]
-        result['AccountTypeNumber'] = row[1]
-        result['FirstName'] = row[2]
-        result['LastName'] = row[3]
-        result['Phone'] = row[4]
-        result['Email'] = row[5]
-        result['MajorNumber'] = row[6]
-        result['AboutMe'] = row[7]
-        result['YearofEnrollment'] = row[8]
-        result['CreationDate'] = row[9]
-        result['LastLogin'] = row[10]
-        result['Status'] = row[11]
+        result['UAID'] = row[0]
+        result['FirstName'] = row[1]
+        result['LastName'] = row[2]
+        result['Email'] = row[3]
+        result['Password'] = row[4]
+        result['Status'] = row[5]
         return result
 
-    def build_users_attributes(self, UserID, AccountTypeNumber,  FirstName, LastName, Phone, Email, MajorNumber, AboutMe, YearofEnrollment, CreationDate, LastLogin, Status):
+    def build_users_attributes(self, UAID,  FirstName, LastName, Email, Password, Status):
         result = {}
-        result['UserID'] = UserID
-        result['AccountTypeNumber'] = AccountTypeNumber
+        result['UAID'] = UAID
         result['FirstName'] = FirstName
         result['LastName'] = LastName
-        result['Phone'] = Phone
         result['Email'] = Email
-        result['MajorNumber'] = MajorNumber
-        result['AboutMe'] = AboutMe
-        result['YearofEnrollment'] = YearofEnrollment
-        result['CreationDate'] = CreationDate
-        result['LastLogin'] = LastLogin
+        result['Password'] = Password
         result['Status'] = Status
         return result
 
     def getAllUsers(self):
-        dao = UserDao.UserDAO()
+        dao = UsersDao.UserDAO()
         users_list = dao.getAllUsers()
         result_list = []
         for row in users_list:
@@ -44,60 +32,50 @@ class UsersHandler:
             result_list.append(result)
         return jsonify(Users=result_list)
 
-    def getUserById(self, UserID):
-        dao = UserDao.UserDAO()
-        row = dao.getUserById(UserID)
+    def getUserById(self, UAID):
+        dao = UsersDao.UserDAO()
+        row = dao.getUserById(UAID)
         if not row:
-            return jsonify(Error = "User Not Found"), 404
+            return jsonify(Error="User Not Found"), 404
         else:
             users = self.build_users_dict(row)
-            return jsonify(Users = users)
+            return jsonify(Users=users)
 
     def insertUserJson(self, json):
-            accounttypenumber = json['AccountTypeNumber']
-            firstname = json['FirstName']
-            lastname = json['LastName']
-            phone = json['Phone']
-            email = json['Email']
-            majornumber = json['MajorNumber']
-            aboutme = json['AboutMe']
-            yearofenrollment = json['YearofEnrollment']
-            creationdate = json['CreationDate']
-            lastlogin = json['LastLogin']
-            status = json['Status']
-            if accounttypenumber and firstname and lastname and phone and email and majornumber and aboutme and yearofenrollment and creationdate and lastlogin and status:
-                dao = UserDao.UserDAO()
-                userid = dao.insert(accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate,lastlogin, status)
-                result = self.build_users_attributes(userid, accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate,lastlogin, status)
-                return jsonify(Users=result), 201
-            else:
-                return jsonify(Error="Unexpected attributes in post request"), 400
-
-    def deleteUser(self, userid):
-        dao = UserDao.UserDAO()
-        if not dao.getUserById(userid):
-            return jsonify(Error = "User not found."), 404
+        firstname = json['FirstName']
+        lastname = json['LastName']
+        email = json['Email']
+        password = json['Password']
+        status = json['Status']
+        if firstname and lastname and email and password and status:
+            dao = UsersDao.UserDAO()
+            UAID = dao.insert(firstname, lastname, email, password, status)
+            result = self.build_users_attributes(
+                UAID, firstname, lastname, email, password, status)
+            return jsonify(Users=result), 201
         else:
-            dao.delete(userid)
-            return jsonify(DeleteStatus = "OK"), 200
+            return jsonify(Error="Unexpected attributes in post request"), 400
 
-    def updateUserJson(self, userid, json):
-        dao = UserDao.UserDAO()
-        if not dao.getUserById(userid):
+    def deleteUser(self, UAID):
+        dao = UsersDao.UserDAO()
+        if not dao.getUserById(UAID):
+            return jsonify(Error="User not found."), 404
+        else:
+            dao.delete(UAID)
+            return jsonify(DeleteStatus="OK"), 200
+
+    def updateUserJson(self, UAID, json):
+        dao = UsersDao.UserDAO()
+        if not dao.getUserById(UAID):
             return jsonify(Error="Admin not found."), 404
         else:
-            accounttypenumber = json['AccountTypeNumber']
             firstname = json['FirstName']
             lastname = json['LastName']
-            phone = json['Phone']
             email = json['Email']
-            majornumber = json['MajorNumber']
-            aboutme = json['AboutMe']
-            yearofenrollment = json['YearofEnrollment']
-            creationdate = json['CreationDate']
-            lastlogin = json['LastLogin']
+            password = json['Password']
             status = json['Status']
-            if accounttypenumber and firstname and lastname and phone and email and majornumber and aboutme and yearofenrollment and creationdate and lastlogin and status:
-                dao.update(accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate, lastlogin, status)
-                result = self.build_users_attributes(userid, accounttypenumber, firstname, lastname, phone, email, majornumber, aboutme, yearofenrollment, creationdate, lastlogin, status)
+            if firstname and lastname and email and password and status:
+                dao.update(firstname, lastname, email, password, status)
+                result = self.build_users_attributes(
+                    UAID, firstname, lastname, email, password, status)
                 return jsonify(Users=result), 200

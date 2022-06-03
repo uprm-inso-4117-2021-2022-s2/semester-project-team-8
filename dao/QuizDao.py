@@ -8,11 +8,6 @@ import deal
 
 class QuizDAO:
     def __init__(self):
-        # connection_url = MySQLdb.connect(host='127.0.0.1', user='admin', passwd='adminprivileges',
-        # db='CSGuideDB', port=6606)
-        connection_url = mysql.connector(
-            host="localhost", user='root', passwd='root', db='CSGuide', port='3306')
-        self.conn = connection_url
 
     def getAllUsers(self):
         cursor = self.conn.cursor()

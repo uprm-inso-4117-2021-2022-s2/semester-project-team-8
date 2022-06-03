@@ -4,10 +4,7 @@ import deal
 
 class UserDAO:
     def __init__(self):
-        connection_url = pymssql.connect(
-            't8csguide.cftycj6fuueb.us-east-1.rds.amazonaws.com', 'csgadmin', 'csg123456', 'csguide')
-        self.conn = connection_url
-
+     
     def getAllUsers(self):
         cursor = self.conn.cursor()
         query = "select * from Users;"
